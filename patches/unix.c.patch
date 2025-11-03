@@ -1,5 +1,5 @@
 diff --git a/unix/unix.c b/unix/unix.c
-index efa97fc..2799f8d 100644
+index efa97fc..cde9bc5 100644
 --- a/unix/unix.c
 +++ b/unix/unix.c
 @@ -30,6 +30,11 @@
@@ -62,7 +62,7 @@ index efa97fc..2799f8d 100644
  #ifdef ACORN_FTYPE_NFS
      /* translate Acorn filetype information if asked to do so */
      if (uO.acorn_nfs_ext &&
-@@ -1091,6 +1108,101 @@ static int get_extattribs(__G__ pzt, z_uidgid)
+@@ -1091,6 +1108,102 @@ static int get_extattribs(__G__ pzt, z_uidgid)
  }
  #endif /* !MTS || SET_DIR_ATTRIB */
  
@@ -77,14 +77,14 @@ index efa97fc..2799f8d 100644
 +    uch *ef_buf = G.extra_field;
 +    unsigned eb_id;
 +    unsigned eb_len;
-+
++    memset(&G.zos_tag, 0, sizeof(G.zos_tag));
 +    while (ef_len >= EB_HEADSIZE) {
 +        eb_id = makeword(EB_ID + ef_buf);
 +        eb_len = makeword(EB_LEN + ef_buf);
 +
 +        if (eb_id == 0x737A) { /* Extra-field block with file tag info */
++            G.zos_tag.eb_id = eb_id;
 +            G.zos_tag.ft_ccsid = makeword(4 + ef_buf);
-+            G.zos_tag.ft_flags = makeword(6 + ef_buf);
 +            return 0;
 +        }
 +
@@ -137,8 +137,9 @@ index efa97fc..2799f8d 100644
 +	  __tag_new_file(fileno(G.outfile));
 +  }
 +
-+  //Tag the binary file regardless of whether it is called with the -a flag or not.
-+  if(!G.zos_tag.ft_ccsid && !G.pInfo->textfile)
++  //Tag the binary file regardless of whether it is called with the -a flag or not
++  //if it is from non-z/OS system
++  if(!G.zos_tag.ft_ccsid && !G.pInfo->textfile && (G.zos_tag.eb_id != 0x737A))
 +  {
 +	  __setfdbinary(fileno(G.outfile));
 +  }
@@ -164,7 +165,7 @@ index efa97fc..2799f8d 100644
  
  
  #ifndef MTS
-@@ -1109,6 +1221,30 @@ void close_outfile(__G)    /* GRR: change to return PK-style warning level */
+@@ -1109,6 +1222,30 @@ void close_outfile(__G)    /* GRR: change to return PK-style warning level */
      ulg z_uidgid[2];
      int have_uidgid_flg;
  
