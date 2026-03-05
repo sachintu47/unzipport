@@ -1,5 +1,5 @@
 diff --git a/unzpriv.h b/unzpriv.h
-index 297b3c7..bba0c49 100644
+index 297b3c7..8022729 100644
 --- a/unzpriv.h
 +++ b/unzpriv.h
 @@ -1844,6 +1844,11 @@
@@ -30,7 +30,7 @@ index 297b3c7..bba0c49 100644
  #ifdef USE_ZLIB
     int    UZinflate              OF((__GPRO__ int is_defl64));  /* inflate.c */
 -#  define inflate_free(x)        inflateEnd(&((Uz_Globs *)(&G))->dstrm)
-+#  define inflate_free(x)        if(((Uz_Globs *)(&G))->inflInit) inflateEnd(&((Uz_Globs *)(&G))->dstrm)
++#  define inflate_free(x)        do { if(((Uz_Globs *)(&G))->inflInit) inflateEnd(&((Uz_Globs *)(&G))->dstrm); } while (0)
  #else
     int    inflate                OF((__GPRO__ int is_defl64));  /* inflate.c */
     int    inflate_free           OF((__GPRO));                  /* inflate.c */

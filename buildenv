@@ -7,7 +7,7 @@ DEBIAN_VERSION="29"
 export ZOPEN_BUILD_LINE="STABLE"
 export ZOPEN_CATEGORIES="compression"
 export ZOPEN_STABLE_URL="https://sourceforge.net/projects/infozip/files/UnZip%206.x%20%28latest%29/UnZip%20${UNZIP_VERSION}/unzip${UNZIP_VERSION_SHORT}.tar.gz"
-export ZOPEN_STABLE_DEPS="make zoslib zip zedc_ascii patch xz"
+export ZOPEN_STABLE_DEPS="curl tar make zoslib zip zedc_ascii patch xz"
 export ZOPEN_DEV_URL="https://github.com/LuaDist/unzip.git"
 export ZOPEN_DEV_DEPS="git make cmake zoslib zip zedc_ascii"
 
@@ -17,6 +17,7 @@ export ZOPEN_INSTALL_OPTS="-f unix/Makefile install prefix=\$ZOPEN_INSTALL_DIR/"
 export ZOPEN_CHECK="${PWD}/unzip-tests/tests.sh"
 export ZOPEN_COMP=CLANG
 export ZOPEN_EXTRA_CFLAGS="-DUSE_ZLIB -DNO_ZLIBCALLBCK"
+export ZOPEN_NAME="unzip-${UNZIP_VERSION}"
 
 zopen_pre_patch() {
   export CFLAGS_EXTRA="$CPPFLAGS $CFLAGS"
@@ -28,8 +29,8 @@ zopen_post_extract() {
   DEBIAN_URL="https://deb.debian.org/debian/pool/main/u/unzip/unzip_${UNZIP_VERSION}-${DEBIAN_VERSION}.debian.tar.xz"
 
   echo "Downloading Debian patches from ${DEBIAN_URL}..."
-  curl -L -o debian_patches.tar.xz ${DEBIAN_URL}
-  tar -xJf debian_patches.tar.xz
+  curl -f -L -o debian_patches.tar.xz ${DEBIAN_URL} || { echo "Failed to download Debian patches from ${DEBIAN_URL}"; return 1; }
+  tar -xJf debian_patches.tar.xz || { echo "Failed to extract Debian patches"; return 1; }
 
   src_dir="$1"
   original_dir=$(pwd)
